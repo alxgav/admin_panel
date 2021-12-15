@@ -1,0 +1,36 @@
+version: '3.8'
+
+
+services:
+  web:
+    build: ./movies_app
+    volumes:
+      - ./movies_app/:/home/app/
+      - static_volume:/home/app/web/static
+    env_file:
+      - ./.env
+    depends_on:
+     - db
+  db:
+   build: ./movies_app/docker/postgres
+   volumes:
+     - postgres_data:/var/lib/postgresql/data
+   environment:
+     - POSTGRES_USER=postgres
+     - POSTGRES_PASSWORD=1234
+     - POSTGRES_DB=movies
+
+  nginx:
+    build:
+      context: ./movies_app/docker/nginx
+      dockerfile: Dockerfile
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/home/app/web/static
+      
+volumes:
+ postgres_data:
+ static_volume:
